@@ -1,0 +1,26 @@
+# cloudbuild.yaml
+steps:
+  # 1) Bygg med Cloud Buildpacks
+  - name: "gcr.io/buildpacks/builder"
+    args:
+      - "--path=."
+  # 2) Tagga bilden som $IMAGE
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - "tag"
+      - "gcr.io/$PROJECT_ID/cj-export"
+      - "$IMAGE"
+  # 3) Deploya till Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "gcloud"
+    args:
+      - "run"
+      - "deploy"
+      - "cj-to-sheets"
+      - "--region=europe-north2"
+      - "--image=$IMAGE"
+      - "--platform=managed"
+      - "--quiet"
+images:
+  # Gör $IMAGE tillgänglig i nästa steg
+  - gcr.io/$PROJECT_ID/cj-export
