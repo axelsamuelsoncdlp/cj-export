@@ -4,3 +4,4 @@ pandas
 gspread
 google-auth
 google-cloud-secret-manager
+gunicorn
