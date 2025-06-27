@@ -1,18 +1,22 @@
+# cloudbuild.yaml
+
 options:
+  # Send logs only to Cloud Logging (no GCS bucket needed)
   logging: CLOUD_LOGGING_ONLY
 
+substitutions:
+  # Define a custom IMAGE variable that tags with the short git SHA
+  _IMAGE: "gcr.io/$PROJECT_ID/cj-export:${SHORT_SHA}"
+
 steps:
-  # 1) Bygg med Cloud Buildpacks
+  # 1) Build & publish container with Buildpacks
   - name: "gcr.io/buildpacks/builder"
     args:
       - "--path=."
-  # 2) Tagga bilden som $IMAGE
-  - name: "gcr.io/cloud-builders/docker"
-    args:
-      - "tag"
-      - "gcr.io/$PROJECT_ID/cj-export"
-      - "$IMAGE"
-  # 3) Deploya till Cloud Run
+      - "--publish"
+      - "--tag=${_IMAGE}"
+
+  # 2) Deploy that image to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: "gcloud"
     args:
@@ -20,9 +24,6 @@ steps:
       - "deploy"
       - "cj-to-sheets"
       - "--region=europe-north2"
-      - "--image=$IMAGE"
       - "--platform=managed"
+      - "--image=${_IMAGE}"
       - "--allow-unauthenticated"
-      - "--quiet"
-images:
-  - "gcr.io/$PROJECT_ID/cj-export"
