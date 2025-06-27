@@ -1,22 +1,21 @@
 # cloudbuild.yaml
 
 options:
-  # Send logs only to Cloud Logging (no GCS bucket needed)
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  # Define a custom IMAGE substitution using the short SHA
-  _IMAGE: "gcr.io/$PROJECT_ID/cj-export:${SHORT_SHA}"
+  # Use the built-in PROJECT_ID and SHORT_SHA substitutions
+  _IMAGE: "gcr.io/${PROJECT_ID}/cj-export:${SHORT_SHA}"
 
 steps:
-  # 1) Build & publish container with Buildpacks, tagging it as ${_IMAGE}
+  # 1) Build & publish container via Buildpacks
   - name: "gcr.io/buildpacks/builder"
     args:
       - "--path=."
       - "--publish"
       - "--tag=${_IMAGE}"
 
-  # 2) Deploy that image to Cloud Run
+  # 2) Deploy that published image to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: "gcloud"
     args:
@@ -28,6 +27,6 @@ steps:
       - "--image=${_IMAGE}"
       - "--allow-unauthenticated"
 
+# Expose the image for potential downstream steps (optional)
 images:
-  # Make the built image available for further steps if needed
   - "${_IMAGE}"
