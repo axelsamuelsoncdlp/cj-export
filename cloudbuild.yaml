@@ -5,11 +5,11 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  # Define a custom IMAGE variable that tags with the short git SHA
+  # Define a custom IMAGE substitution using the short SHA
   _IMAGE: "gcr.io/$PROJECT_ID/cj-export:${SHORT_SHA}"
 
 steps:
-  # 1) Build & publish container with Buildpacks
+  # 1) Build & publish container with Buildpacks, tagging it as ${_IMAGE}
   - name: "gcr.io/buildpacks/builder"
     args:
       - "--path=."
@@ -27,3 +27,7 @@ steps:
       - "--platform=managed"
       - "--image=${_IMAGE}"
       - "--allow-unauthenticated"
+
+images:
+  # Make the built image available for further steps if needed
+  - "${_IMAGE}"
