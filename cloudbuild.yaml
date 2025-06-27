@@ -1,4 +1,6 @@
-# cloudbuild.yaml
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 steps:
   # 1) Bygg med Cloud Buildpacks
   - name: "gcr.io/buildpacks/builder"
@@ -20,7 +22,7 @@ steps:
       - "--region=europe-north2"
       - "--image=$IMAGE"
       - "--platform=managed"
+      - "--allow-unauthenticated"
       - "--quiet"
 images:
-  # Gör $IMAGE tillgänglig i nästa steg
-  - gcr.io/$PROJECT_ID/cj-export
+  - "gcr.io/$PROJECT_ID/cj-export"
